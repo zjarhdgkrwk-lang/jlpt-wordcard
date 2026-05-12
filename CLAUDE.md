@@ -147,6 +147,31 @@ plain white background, centered, children's textbook style, no text
 - あんな → `A person pointing at a far-away object with a thoughtful expression, the object visible in the distance, ...`
 - 大きな → `A small person standing next to a very large object (like a giant tree), size contrast emphasized, ...`
 
+### Abstract subject override (CRITICAL)
+
+When the word is an abstract noun (time/space/social concepts) or a 
+time/degree/manner adverb, the "minimal single subject" preference of the 
+style tail produces ambiguous images. For these, deliberately COUNTERACT 
+the tail with explicit redundancy in the prompt body.
+
+Rules:
+1. Enumerate 2-3 required elements with an explicit "MUST be visible" 
+   directive. Example: 
+   "The image must clearly include all of: (a) ..., (b) ..., (c) ..."
+2. Prefer a small human actor + symbolic anchor over symbol alone. 
+   A person doing the action grounds the concept.
+3. For "specific point in a sequence" concepts, explicitly BLANK OUT 
+   competing elements: "all OTHER cells/items empty", "no numbers in 
+   other positions", "only X visible".
+4. For duration/progression concepts (하루, 한 주, 한 달), use a 
+   horizontal time progression (3-4 stages, left-to-right) rather than 
+   a single moment.
+5. Directional / sequence concepts: use multiple convention-bound cues 
+   (numbered steps + arrows + before/after positions).
+6. Avoid speech bubbles, labels, signs — these tend to leak text.
+
+The mandatory style tail still appends as usual.
+
 ### 3.7 Polysemy handling (중요)
 
 CSV에는 동일 word가 다른 `front_hint`와 `reading_hiragana`로 두 번 등장하는 경우가 있다 (예: 一日의 ついたち vs いちにち).
