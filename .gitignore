@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Project artifacts (큼 또는 시크릿)
+images/
+logs/
+samples/
+.env
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
