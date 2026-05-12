@@ -64,7 +64,7 @@ flat vector illustration, soft pastel colors, minimal clean composition,
 plain white background, centered, children's textbook style, no text
 ```
 
-목표 총 길이: **40~70 단어**. 60단어를 넘기지 말 것. 짧은 프롬프트가 더 안정적.
+Target total length: **25-50 words** including the mandatory style tail (~17 words). For abstract subject override cases (see §3.6), **60-90 words** is acceptable due to required element enumeration. Hard ceiling: **100 words**.
 
 ### 3.3 Composition rules
 
@@ -147,28 +147,34 @@ plain white background, centered, children's textbook style, no text
 - あんな → `A person pointing at a far-away object with a thoughtful expression, the object visible in the distance, ...`
 - 大きな → `A small person standing next to a very large object (like a giant tree), size contrast emphasized, ...`
 
-### Abstract subject override (CRITICAL)
+#### Abstract subject override (CRITICAL)
 
-When the word is an abstract noun (time/space/social concepts) or a 
-time/degree/manner adverb, the "minimal single subject" preference of the 
-style tail produces ambiguous images. For these, deliberately COUNTERACT 
-the tail with explicit redundancy in the prompt body.
+When the word is an abstract noun (time, space, social/action concepts)
+or a time/degree/manner adverb, the "minimal single subject" preference
+of the style tail produces ambiguous images at z_image_turbo's 8 steps.
+For these, deliberately COUNTERACT the tail with explicit redundancy.
 
 Rules:
-1. Enumerate 2-3 required elements with an explicit "MUST be visible" 
-   directive. Example: 
-   "The image must clearly include all of: (a) ..., (b) ..., (c) ..."
-2. Prefer a small human actor + symbolic anchor over symbol alone. 
-   A person doing the action grounds the concept.
-3. For "specific point in a sequence" concepts, explicitly BLANK OUT 
-   competing elements: "all OTHER cells/items empty", "no numbers in 
-   other positions", "only X visible".
-4. For duration/progression concepts (하루, 한 주, 한 달), use a 
-   horizontal time progression (3-4 stages, left-to-right) rather than 
-   a single moment.
-5. Directional / sequence concepts: use multiple convention-bound cues 
-   (numbered steps + arrows + before/after positions).
-6. Avoid speech bubbles, labels, signs — these tend to leak text.
+1. Enumerate 2-4 required elements with a "MUST be visible" directive:
+   "The image must clearly show: (a) ..., (b) ..., (c) ..."
+2. Prefer "human actor + symbolic anchor" over symbol alone. A small
+   person performing/inhabiting the concept grounds the abstraction.
+3. For "specific point in a sequence" concepts: explicitly blank out
+   competing elements. ("only X visible", "all other cells empty", "no
+   labels on other items").
+4. For duration/progression concepts: use a horizontal 3-4 stage
+   left-to-right strip with a connecting arrow, not a single moment.
+5. For NEGATIVE SPACE concepts (gap, between, interval): the empty
+   space itself must be made visually conspicuous via (a) pastel
+   shading of the empty region, (b) a person or marker placed in it,
+   (c) bidirectional arrows from the center outward to flanking
+   objects. Without this, models render the surrounding objects but
+   not the gap itself.
+6. For "this very moment / right now" concepts: use a person actively
+   gesturing at the time indicator (pointing, looking at watch), not
+   the indicator alone.
+7. Avoid speech bubbles, captions, labels, signs — these tend to leak
+   text in the output.
 
 The mandatory style tail still appends as usual.
 
