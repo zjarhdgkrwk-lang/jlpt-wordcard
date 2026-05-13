@@ -110,6 +110,10 @@ FEWSHOT_INPUT = [
     {"global_id": "EX_4", "word": "めっきり", "reading_hiragana": "めっきり", "meaning_ko": "눈에 띄게, 부쩍", "pos": "부사"},
     {"global_id": "EX_5", "word": "ありがとうございます", "reading_hiragana": "ありがとうございます", "meaning_ko": "감사합니다", "pos": "표현"},
     {"global_id": "EX_6", "word": "一日", "reading_hiragana": "ついたち", "meaning_ko": "1일; 매달 첫째 날", "pos": "명사", "front_hint": "매월 첫날"},
+    {"global_id": "EX_7", "word": "一日", "reading_hiragana": "いちにち",
+     "meaning_ko": "1일; 하루, 온종일", "pos": "명사"},
+    {"global_id": "EX_8", "word": "間", "reading_hiragana": "あいだ",
+     "meaning_ko": "사이; 동안", "pos": "명사"},
 ]
 
 FEWSHOT_OUTPUT = [
@@ -125,6 +129,10 @@ FEWSHOT_OUTPUT = [
      "prompt": "A customer receiving a small gift-wrapped package from a shop clerk across a counter, both smiling warmly, simple shop interior, flat vector illustration, soft pastel colors, minimal clean composition, plain white background, centered, children's textbook style, no text"},
     {"global_id": "EX_6",
      "prompt": "A wall calendar page with the date \"1\" clearly marked and circled at the top-left corner of the month grid, indicating the first day of the month, flat vector illustration, soft pastel colors, minimal clean composition, plain white background, centered, children's textbook style, no text"},
+    {"global_id": "EX_7",
+     "prompt": "A horizontal strip showing the progression of one full day from left to right in four small connected scenes: morning sunrise with a person waking up, midday with high sun and a person at work, evening sunset with warm orange sky, night with moon and stars and a person sleeping; a subtle curved arrow above connects all four scenes to convey continuous duration. The image must clearly show four distinct time-of-day stages, not one or two. flat vector illustration, soft pastel colors, minimal clean composition, plain white background, centered, children's textbook style, no text"},
+    {"global_id": "EX_8",
+     "prompt": "A child standing centered in the empty space between two distinctly different flanking objects (a tall tree on the left and a small house on the right) of similar height; the ground area between the objects is softly shaded in a contrasting pastel tone so the empty space itself reads as the visual subject; short horizontal double-headed arrows on the ground extend outward from the child to each flanking object. The image must clearly show: (a) two visibly different flanking objects, (b) a child positioned exactly in the middle of the gap, (c) the central ground area visually highlighted by shading, (d) bilateral double-headed arrows from center pointing outward. flat vector illustration, soft pastel colors, minimal clean composition, plain white background, centered, children's textbook style, no text"},
 ]
 
 # -----------------------------------------------------------------------------
