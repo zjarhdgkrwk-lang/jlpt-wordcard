@@ -147,6 +147,46 @@ Target total length: **25-50 words** including the mandatory style tail (~17 wor
 - あんな → `A person pointing at a far-away object with a thoughtful expression, the object visible in the distance, ...`
 - 大きな → `A small person standing next to a very large object (like a giant tree), size contrast emphasized, ...`
 
+#### Contrast conjunctions (しかし, でも, けれども, ところが)
+
+Sequence-style arrows ("→") between two panels are misread as "then"
+not "but". Use these elements instead:
+- The SAME character must appear on BOTH sides (not different scenes)
+- Use a JAGGED ZIGZAG or LIGHTNING-BOLT divider (NOT a smooth arrow)
+- Left side = positive/expected state; right side = unexpected reversal
+- The MUST enumeration should explicitly require "the same character on
+  both sides" and "zigzag divider, NOT smooth arrow"
+
+#### Apology / accident expressions (すみません, ごめんなさい, 失礼)
+
+A generic "two people facing each other" reads as greeting, not apology.
+Force visible accident evidence:
+- Multiple dropped objects (3+ books/papers) scattered on the ground
+- Visible motion lines indicating recent impact
+- One person's hand on their OWN chest (NOT extended toward the other)
+  with regretful face
+- MUST enumeration must include both the dropped objects AND apologetic
+  body language as separate items
+
+#### Intent / willfulness adverbs (わざと, あえて)
+
+"Intention" is invisible. Force these markers:
+- A clearly SNEAKY expression: narrowed eyes, sideways glance, NOT a
+  cheerful smile (explicitly negate cheerful smile in prompt)
+- A WITNESS in the background (parent, teacher) with disapproving body
+  language, providing contextual evidence that the act is willful
+- MUST enumeration must require BOTH the sneaky expression AND the witness
+
+#### Abstract action/state nouns — symbol selection
+
+Choose symbols with HIGH cross-cultural intuitive value:
+- "Influence/spread": ripples in water (NOT dominoes — z_image_turbo
+  produces weird hybrid figures)
+- "Critical situation": red warning triangle (NOT world map — too specific)
+- "Precious/cherished": teddy bear / photo frame / heart symbol (NOT plant
+  — connection is too indirect)
+- "Development/growth": before/after diptych of same location
+
 #### Abstract subject override (CRITICAL)
 
 When the word is an abstract noun (time, space, social/action concepts)
@@ -155,8 +195,7 @@ of the style tail produces ambiguous images at z_image_turbo's 8 steps.
 For these, deliberately COUNTERACT the tail with explicit redundancy.
 
 Rules:
-1. Enumerate 2-4 required elements with a "MUST be visible" directive:
-   "The image must clearly show: (a) ..., (b) ..., (c) ..."
+1. For abstract entries, the output prompt MUST contain (verbatim) the phrase "The image must clearly show: (a) ..., (b) ..., (c) ..." enumerating 2-4 concrete visual elements. This is enforced by a post-generation validator that rejects any abstract prompt missing this phrase; rejected prompts are automatically retried with stricter temperature.
 2. Prefer "human actor + symbolic anchor" over symbol alone. A small
    person performing/inhabiting the concept grounds the abstraction.
 3. For "specific point in a sequence" concepts: explicitly blank out
