@@ -11,6 +11,9 @@ samples/
 .env
 *.log
 
+# Temporary working files
+data/_sample_test.csv
+
 # OS
 .DS_Store
 Thumbs.db
