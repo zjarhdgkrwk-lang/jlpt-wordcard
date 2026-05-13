@@ -16,6 +16,7 @@ import argparse
 import json
 import logging
 import os
+import re
 import sys
 import time
 from dataclasses import dataclass
@@ -43,11 +44,46 @@ TEMPERATURE = 0.4
 PROMPT_VERSION = "v1"
 
 # -----------------------------------------------------------------------------
+# MUST-directive validator
+# -----------------------------------------------------------------------------
+
+ABSTRACT_POS = {"부사", "접속사", "표현", "연체사"}
+MUST_PATTERN = re.compile(r"must\s+(clearly\s+)?show", re.IGNORECASE)
+
+ABSTRACT_NOUN_KEYWORDS = [
+    "발전", "영향", "사태", "상황", "경향", "발휘", "사퇴", "관계",
+    "변화", "현상", "발생", "문제", "원인", "결과", "이유", "목적",
+    "수단", "방법", "과정", "상태", "경우", "기회", "능력", "수준",
+    "정도", "범위", "사이", "동안", "전", "후", "뒤", "앞",
+    "위", "아래", "안", "밖", "중간",
+]
+
+
+def needs_must_directive(entry: dict) -> bool:
+    if entry.get("pos") in ABSTRACT_POS:
+        return True
+    if entry.get("pos") == "명사":
+        meaning = entry.get("meaning_ko", "")
+        return any(kw in meaning for kw in ABSTRACT_NOUN_KEYWORDS)
+    return False
+
+
+# -----------------------------------------------------------------------------
 # Style guide (system prompt). CLAUDE.md 섹션 3을 그대로 옮겨와도 되지만,
 # 토큰 절약을 위해 핵심만 압축. 변경 시 PROMPT_VERSION 올릴 것.
 # -----------------------------------------------------------------------------
 
 SYSTEM_PROMPT = """You write English image-generation prompts for an Anki Japanese-vocabulary deck. Images are made with z_image_turbo (8 steps, CFG 1.0, 768x768).
+
+# ABSTRACT ENTRY HARD RULE (non-negotiable)
+
+Classify the entry as ABSTRACT if ANY of the following:
+- pos in {부사, 접속사, 표현, 연체사}
+- pos == 명사 AND meaning_ko contains action/state/relation/quantity/spatial-relation/temporal concepts (e.g. 発展, 影響, 事態, 関係, 変化, 程度, 範囲, 間, 後, 前)
+
+For EVERY abstract entry, your prompt body MUST contain (verbatim) the phrase "The image must clearly show: (a) ..., (b) ..., (c) ..." enumerating 2-4 concrete visual elements. Failure to include this phrase results in automatic rejection and retry.
+
+For CONCRETE entries (animals, objects, food, people roles, simple natural phenomena, verbs of physical action, simple い/な-adjectives describing concrete properties), do NOT use the enumeration pattern.
 
 # Mandatory style tail (append verbatim at the end of EVERY prompt)
 flat vector illustration, soft pastel colors, minimal clean composition, plain white background, centered, children's textbook style, no text
@@ -114,6 +150,14 @@ FEWSHOT_INPUT = [
      "meaning_ko": "1일; 하루, 온종일", "pos": "명사"},
     {"global_id": "EX_8", "word": "間", "reading_hiragana": "あいだ",
      "meaning_ko": "사이; 동안", "pos": "명사"},
+    {"global_id": "EX_9", "word": "しかし", "reading_hiragana": "しかし",
+     "meaning_ko": "그러나; 하지만", "pos": "접속사"},
+    {"global_id": "EX_10", "word": "すみません", "reading_hiragana": "すみません",
+     "meaning_ko": "죄송합니다; 실례합니다", "pos": "표현"},
+    {"global_id": "EX_11", "word": "影響", "reading_hiragana": "えいきょう",
+     "meaning_ko": "영향", "pos": "명사"},
+    {"global_id": "EX_12", "word": "大切", "reading_hiragana": "たいせつ",
+     "meaning_ko": "소중함; 중요함", "pos": "な형용사"},
 ]
 
 FEWSHOT_OUTPUT = [
@@ -133,6 +177,14 @@ FEWSHOT_OUTPUT = [
      "prompt": "A horizontal strip showing the progression of one full day from left to right in four small connected scenes: morning sunrise with a person waking up, midday with high sun and a person at work, evening sunset with warm orange sky, night with moon and stars and a person sleeping; a subtle curved arrow above connects all four scenes to convey continuous duration. The image must clearly show four distinct time-of-day stages, not one or two. flat vector illustration, soft pastel colors, minimal clean composition, plain white background, centered, children's textbook style, no text"},
     {"global_id": "EX_8",
      "prompt": "A child standing centered in the empty space between two distinctly different flanking objects (a tall tree on the left and a small house on the right) of similar height; the ground area between the objects is softly shaded in a contrasting pastel tone so the empty space itself reads as the visual subject; short horizontal double-headed arrows on the ground extend outward from the child to each flanking object. The image must clearly show: (a) two visibly different flanking objects, (b) a child positioned exactly in the middle of the gap, (c) the central ground area visually highlighted by shading, (d) bilateral double-headed arrows from center pointing outward. flat vector illustration, soft pastel colors, minimal clean composition, plain white background, centered, children's textbook style, no text"},
+    {"global_id": "EX_9",
+     "prompt": "A horizontal split composition divided by a thick zigzag lightning-bolt-shaped boundary in the middle (NOT a smooth arrow): on the left side the same character is shown smiling and confidently walking forward toward a goal; on the right side the same character is shown abruptly stopped with a surprised expression facing a tall wall blocking the path. The image must clearly show: (a) the SAME character appearing on both left and right sides, (b) a confident positive state on the left and an unexpected obstacle on the right, (c) a JAGGED ZIGZAG divider between the two sides, NOT a smooth directional arrow, to convey contradiction rather than sequence. flat vector illustration, soft pastel colors, minimal clean composition, plain white background, centered, children's textbook style, no text"},
+    {"global_id": "EX_10",
+     "prompt": "A sidewalk collision moment just after impact: two people stand facing each other with several books and papers scattered on the ground between their feet; small motion lines around them indicate the recent impact; one person leans slightly forward with one hand placed on their own chest in a clear apologetic gesture and a regretful facial expression; the other person looks startled. The image must clearly show: (a) at least three or four visibly fallen books or papers scattered on the ground between the two people, (b) clear apologetic body language of one person (hand on their own chest, slight forward lean, regretful face), (c) small motion lines or impact indicators around them showing a collision just occurred. flat vector illustration, soft pastel colors, minimal clean composition, plain white background, centered, children's textbook style, no text"},
+    {"global_id": "EX_11",
+     "prompt": "A pebble has just splashed into the center of a calm pond, creating three or more concentric circular ripples spreading outward across the water surface; a small leaf floating at the edge of the pond is visibly displaced by the outermost ripple; top-down view of the pond with the splash point centered. The image must clearly show: (a) the central splash point with the pebble entering the water, (b) at least three distinct concentric ripple rings expanding outward, (c) the small leaf at the edge being visibly affected by the outermost ripple, indicating cause spreading to effect. flat vector illustration, soft pastel colors, minimal clean composition, plain white background, centered, children's textbook style, no text"},
+    {"global_id": "EX_12",
+     "prompt": "A small child sitting on the floor, hugging a well-worn teddy bear tightly to their chest with eyes peacefully closed and a tender loving facial expression; a soft warm pastel-yellow glow radiates around the embrace to emphasize the bond, flat vector illustration, soft pastel colors, minimal clean composition, plain white background, centered, children's textbook style, no text"},
 ]
 
 # -----------------------------------------------------------------------------
@@ -206,6 +258,92 @@ def call_claude(client: Anthropic, batch: list[dict[str, Any]], retry: int = 0) 
     if in_ids != out_ids:
         raise ValueError(f"global_id mismatch. Expected {in_ids[:3]}..., got {out_ids[:3]}...")
 
+    # MUST directive validation for abstract entries
+    missing_entries = [
+        entry for entry, result in zip(batch, parsed)
+        if needs_must_directive(entry) and not MUST_PATTERN.search(result.get("prompt", ""))
+    ]
+
+    if missing_entries:
+        logging.warning(
+            "MUST directive missing in %d/%d abstract entries; calling strict retry: %s",
+            len(missing_entries), len(batch),
+            [e["global_id"] for e in missing_entries],
+        )
+        try:
+            strict_results = call_claude_strict_must(client, missing_entries)
+            strict_by_id = {r["global_id"]: r for r in strict_results}
+            parsed = [strict_by_id.get(r["global_id"], r) for r in parsed]
+
+            still_missing = [
+                entry for entry in missing_entries
+                if not MUST_PATTERN.search(strict_by_id.get(entry["global_id"], {}).get("prompt", ""))
+            ]
+            for entry in still_missing:
+                logging.warning(
+                    "MUST still absent after strict retry: %s (%s)",
+                    entry["global_id"], entry.get("word", ""),
+                )
+                FAILURES_LOG.parent.mkdir(parents=True, exist_ok=True)
+                with FAILURES_LOG.open("a", encoding="utf-8") as f:
+                    f.write(json.dumps({
+                        "global_id": entry["global_id"],
+                        "reason": "missing MUST directive after 2 retries",
+                        "word": entry.get("word"),
+                        "pos": entry.get("pos"),
+                        "prompt": strict_by_id.get(entry["global_id"], {}).get("prompt", ""),
+                    }, ensure_ascii=False) + "\n")
+        except Exception as e:
+            logging.error("Strict MUST retry failed: %s", e)
+
+    return parsed
+
+
+def call_claude_strict_must(client: Anthropic, batch: list[dict[str, Any]]) -> list[dict[str, str]]:
+    """Abstract entries missing MUST directive — strict retry at temperature 0.1."""
+    strict_suffix = (
+        "\n\nRETRY MODE: Previous attempt FAILED because abstract entry prompts did not contain "
+        "the required phrase 'The image must clearly show: (a) ..., (b) ..., (c) ...'. "
+        "For these entries, you MUST include this verbatim phrase. Output without this phrase "
+        "will be rejected and discarded. Be verbose if needed; the enumeration is non-negotiable."
+    )
+    fewshot_in = json.dumps(FEWSHOT_INPUT, ensure_ascii=False, indent=2)
+    fewshot_out = json.dumps(FEWSHOT_OUTPUT, ensure_ascii=False, indent=2)
+
+    logging.warning("Strict MUST retry for %d entries: %s",
+                    len(batch), [r["global_id"] for r in batch])
+
+    response = client.messages.create(
+        model=MODEL,
+        max_tokens=MAX_TOKENS,
+        temperature=0.1,
+        system=[
+            {
+                "type": "text",
+                "text": SYSTEM_PROMPT + strict_suffix,
+                "cache_control": {"type": "ephemeral"},
+            }
+        ],
+        messages=[
+            {"role": "user", "content": f"Here are example inputs:\n{fewshot_in}"},
+            {"role": "assistant", "content": fewshot_out},
+            {"role": "user", "content": f"Strict retry batch:\n{json.dumps(batch, ensure_ascii=False, indent=2)}"},
+        ],
+    )
+
+    text = response.content[0].text.strip()
+    if text.startswith("```"):
+        text = text.split("```")[1]
+        if text.startswith("json"):
+            text = text[4:]
+        text = text.strip()
+
+    parsed = json.loads(text)
+    if not isinstance(parsed, list) or len(parsed) != len(batch):
+        raise ValueError(
+            f"Strict retry: expected list of {len(batch)}, got "
+            f"{type(parsed).__name__} of len {len(parsed) if hasattr(parsed, '__len__') else '?'}"
+        )
     return parsed
 
 
